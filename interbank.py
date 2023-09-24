@@ -25,7 +25,7 @@ class Config:
     """
     Configuration parameters for the interbank network
     """
-    T: int = 1000  # time (1000)
+    T: int = 10  # time (1000)
     N: int = 50  # number of banks (50)
 
     # not used in this implementation:
@@ -166,7 +166,7 @@ class Statistics:
             self.save_liquidity(export_datafile)
             self.save_credit_channels(export_datafile)
 
-        if Utils.is_notebook():
+        if Utils.is_notebook() or Utils.is_spyder():
             from bokeh.io import output_notebook
             output_notebook()
             self.plot_bankruptcies()
@@ -1037,6 +1037,7 @@ class Utils:
             model.ŋ = eta
         if debug:
             model.do_debug(debug)
+        print(log,"hello")
         model.log.define_log(log, logfile, modules)
         Utils.run(save, Utils.__extract_t_values_from_arg__(graph))
 
@@ -1051,10 +1052,16 @@ class Utils:
     def is_notebook():
         try:
             __IPYTHON__
-            return True
+            return get_ipython().__class__.__name__!="SpyderShell"
         except NameError:
             return False
-
+        
+    @staticmethod
+    def is_spyder():
+        try:
+            return get_ipython().__class__.__name__=="SpyderShell"
+        except:
+            return False
 
 # %%
 
