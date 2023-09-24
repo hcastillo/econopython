@@ -14,7 +14,6 @@ import logging
 import math
 import typer
 import bokeh.plotting
-import bokeh.io
 import numpy as np
 import sys
 import networkx as nx
@@ -26,7 +25,7 @@ class Config:
     Configuration parameters for the interbank network
     """
     T: int = 10  # time (1000)
-    N: int = 50  # number of banks (50)
+    N: int = 50   # number of banks (50)
 
     # not used in this implementation:
     # ȓ: float  = 0.02     # percentage reserves (at the moment, no R is used)
@@ -167,8 +166,6 @@ class Statistics:
             self.save_credit_channels(export_datafile)
 
         if Utils.is_notebook() or Utils.is_spyder():
-            from bokeh.io import output_notebook
-            output_notebook()
             self.plot_bankruptcies()
             self.plot_liquidity()
             self.plot_best_lender()
@@ -230,58 +227,56 @@ class Statistics:
 
     def plot_bankruptcies(self):
         title = "Bankruptcies"
+        plt.clf()
         xx = []
         yy = []
         for i in range(self.model.config.T):
             xx.append(i)
             yy.append(self.bankruptcy[i])
-        p = bokeh.plotting.figure(title=title, x_axis_label="Time", y_axis_label="num of bankruptcies",
-                                  sizing_mode="stretch_width",
-                                  height=550)
-        p.line(xx, yy, color="blue", line_width=2)
-        bokeh.plotting.show(p)
+        plt.plot(xx, yy, 'b-')
+        plt.ylabel("Num of bankruptcies")
+        plt.xlabel("Time")
+        plt.title(title)
+        plt.show()
+        
+        
 
     def plot_interest_rate(self):
         title = "Interest"
+        plt.clf()
         xx = []
         yy = []
         for i in range(self.model.config.T):
             xx.append(i)
             yy.append(self.interest_rate[i])
-        p = bokeh.plotting.figure(title=title, x_axis_label='Time', y_axis_label='interest',
-                                  sizing_mode="stretch_width",
-                                  height=550)
-        p.line(xx, yy, color="blue", line_width=2)
-        bokeh.plotting.show(p)
+        plt.plot(xx, yy, 'b-')
+        plt.ylabel("interest")
+        plt.xlabel("Time")
+        plt.title(title)
+        plt.show() 
 
     def save_liquidity(self, export_datafile):
-        p = self.plot_liquidity(no_draw_but_return=True)
-        bokeh.plotting.output_file(Statistics.get_export_path(export_datafile).replace(".txt", "_liquidity.html"),
-                                   title="Liquidity")
-        bokeh.plotting.save(p)
+        self.plot_liquidity(no_draw_but_return=True)
+        plt.savefig(Statistics.get_export_path(export_datafile).replace(".txt", "_liquidity.svg"))
 
     def save_credit_channels(self, export_datafile):
-        p = self.plot_credit_channels(no_draw_but_return=True)
-        bokeh.plotting.output_file(Statistics.get_export_path(export_datafile).replace(".txt", "_credit_channels.html"),
-                                   title="Liquidity")
-        bokeh.plotting.save(p)
+        self.plot_credit_channels(no_draw_but_return=True)
+        plt.savefig(Statistics.get_export_path(export_datafile).replace(".txt", "_credit_channels.svg"))
 
     def plot_liquidity(self, no_draw_but_return: bool = False):
         title = "Liquidity"
+        plt.clf()
         xx = []
         yy = []
         for i in range(self.model.config.T):
             xx.append(i)
             yy.append(self.liquidity[i])
-
-        p = bokeh.plotting.figure(title=title, x_axis_label='Time', y_axis_label='Ʃ liquidity',
-                                  sizing_mode="stretch_width",
-                                  height=550)
-        p.line(xx, yy, color="blue", line_width=2)
-        if no_draw_but_return:
-            return p
-        else:
-            bokeh.plotting.show(p)
+        plt.plot(xx, yy, 'b-')
+        plt.ylabel("Ʃ liquidity")
+        plt.xlabel("Time")
+        plt.title(title)
+        if not no_draw_but_return:
+            plt.show()
 
     def plot_credit_channels(self, no_draw_but_return: bool = False):
         title = "Credit Channels"
@@ -290,14 +285,13 @@ class Statistics:
         for i in range(self.model.config.T):
             xx.append(i)
             yy.append(self.credit_channels[i])
-        p = bokeh.plotting.figure(title=title, x_axis_label='Time', y_axis_label='Credit channels',
-                                  sizing_mode="stretch_width",
-                                  height=550)
-        p.line(xx, yy, color="blue", line_width=2)
-        if no_draw_but_return:
-            return p
-        else:
-            bokeh.plotting.show(p)
+        plt.clf()
+        plt.plot(xx, yy, 'b-')
+        plt.ylabel("Credit channels")
+        plt.xlabel("Time")
+        plt.title(title)
+        if not no_draw_but_return:
+            plt.show()
 
     def plot_best_lender(self):
         title = "Best Lender"
@@ -308,13 +302,13 @@ class Statistics:
             xx.append(i)
             yy.append(self.best_lender[i] / self.model.config.N)
             yy2.append(self.best_lender_clients[i] / self.model.config.N)
-
-        p = bokeh.plotting.figure(title=title, x_axis_label='Time', y_axis_label='Best lenders',
-                                  sizing_mode="stretch_width",
-                                  height=550)
-        p.line(xx, yy, legend_label=f"{title} id", color="black", line_width=2)
-        p.line(xx, yy2, legend_label=f"{title} num clients", color="red", line_width=2, line_dash='dashed')
-        bokeh.plotting.show(p)
+        plt.clf()
+        plt.plot( xx, yy, 'r-' ,xx, yy2,'b--')
+        plt.suptitle(title)
+        plt.xlabel("Best lender(red)")
+        plt.ylabel("Clients best lender(blue)")
+        plt.savefig("eps%s.tinv%s.liqguru.svg" % (Config.ϵ, int(Config.T_inv)))
+        plt.show()
 
 
 class Log:
@@ -1037,7 +1031,6 @@ class Utils:
             model.ŋ = eta
         if debug:
             model.do_debug(debug)
-        print(log,"hello")
         model.log.define_log(log, logfile, modules)
         Utils.run(save, Utils.__extract_t_values_from_arg__(graph))
 
