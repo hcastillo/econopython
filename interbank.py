@@ -24,8 +24,8 @@ class Config:
     """
     Configuration parameters for the interbank network
     """
-    T: int = 100  # time (1000)
-    N: int = 50  # number of banks (50)
+    T: int = 1000  # time (1000)
+    N: int = 50    # number of banks (50)
 
     # not used in this implementation:
     # ȓ: float  = 0.02     # percentage reserves (at the moment, no R is used)
@@ -309,6 +309,7 @@ class Statistics:
         plt.ylabel("Clients best lender(blue)")
         if not no_draw_but_return:
             plt.show()
+
 
 
 class Log:

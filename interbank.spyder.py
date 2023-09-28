@@ -292,7 +292,7 @@ class Statistics:
         if not no_draw_but_return:
             plt.show()
 
-    def plot_best_lender(self):
+    def plot_best_lender(self, no_draw_but_return: bool = False):
         title = "Best Lender"
         xx = []
         yy = []
