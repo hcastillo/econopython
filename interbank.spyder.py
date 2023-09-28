@@ -12,7 +12,6 @@ import enum
 import random
 import logging
 import math
-import typer
 import bokeh.plotting
 import numpy as np
 import sys
@@ -293,7 +292,7 @@ class Statistics:
         if not no_draw_but_return:
             plt.show()
 
-    def plot_best_lender(self, no_draw_but_return: bool = False):
+    def plot_best_lender(self):
         title = "Best Lender"
         xx = []
         yy = []
@@ -307,7 +306,7 @@ class Statistics:
         plt.suptitle(title)
         plt.xlabel("Best lender(red)")
         plt.ylabel("Clients best lender(blue)")
-        if not no_draw_but_return:
+        if not no_draw_but_return:       
             plt.show()
 
 
@@ -1010,29 +1009,16 @@ class Utils:
             return t
 
     @staticmethod
-    def run_interactive(log: str = typer.Option('ERROR', help="Log level messages (ERROR,DEBUG,INFO...)"),
-                        modules: str = typer.Option(None, help=f"Log only this modules (separated by ,)"),
-                        logfile: str = typer.Option(None, help="File to send logs to"),
-                        save: str = typer.Option(None, help=f"Saves the output of this execution"),
-                        graph: str = typer.Option(None, help=f"List of t in which save the network config"),
-                        n: int = typer.Option(Config.N, help=f"Number of banks"),
-                        debug: int = typer.Option(None, help="Stop and enter in debug mode after at this time"),
-                        eta: float = typer.Option(Model.ŋ, help=f"Policy recommendation"),
-                        t: int = typer.Option(Config.T, help=f"Time repetitions")):
+    def run_interactive(log: str = "ERROR",  # Log level messages (ERROR,DEBUG,INFO...)
+                        logfile: str = None, # File to send logs to"),
+                        save: str = None):   # Saves the output of this execution"),
+                        
         """
             Run interactively the model
         """
         global model
-        if t != model.config.T:
-            model.config.T = t
-        if n != model.config.N:
-            model.config.N = n
-        if eta != model.ŋ:
-            model.ŋ = eta
-        if debug:
-            model.do_debug(debug)
-        model.log.define_log(log, logfile, modules)
-        Utils.run(save, Utils.__extract_t_values_from_arg__(graph))
+        model.log.define_log(log, logfile)
+        Utils.run(save)
 
     @staticmethod
     def run(save=None, save_graph_instants=None):
@@ -1067,7 +1053,7 @@ if Utils.is_notebook():
 else:
     # if we are running interactively:
     if __name__ == "__main__":
-        typer.run(Utils.run_interactive)
+        Utils.run_interactive()
 
 # in other cases, if you import it, the process will be:
 #   model = Model()
