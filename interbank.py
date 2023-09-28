@@ -24,8 +24,8 @@ class Config:
     """
     Configuration parameters for the interbank network
     """
-    T: int = 10  # time (1000)
-    N: int = 50   # number of banks (50)
+    T: int = 100  # time (1000)
+    N: int = 50  # number of banks (50)
 
     # not used in this implementation:
     # ȓ: float  = 0.02     # percentage reserves (at the moment, no R is used)
@@ -36,14 +36,14 @@ class Config:
     ω: float = 0.55  # omega
 
     # screening costs
-    Φ: float = 0.025  # phi
+    Φ: float = 0.025   # phi
     Χ: float = 0.015  # ji
 
     # liquidation cost of collateral
     ξ: float = 0.3  # xi
     ρ: float = 0.3  # ro fire sale cost
 
-    β: float = 5    # intensity of breaking the connection
+    β: float = 4    # intensity of breaking the connection
     α: float = 0.1  # below this level of E or D, we will bankrupt the bank
 
     # banks initial parameters
@@ -1040,6 +1040,7 @@ class Utils:
         model.initialize(export_datafile=save, save_graphs_instants=save_graph_instants)
         model.simulate_full()
         model.finish()
+
 
     @staticmethod
     def is_notebook():
