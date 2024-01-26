@@ -12,12 +12,11 @@ import enum
 import random
 import logging
 import math
-import typer
-import bokeh.plotting
+import argparse
 import numpy as np
 import sys
-import networkx as nx
 import matplotlib.pyplot as plt
+# import networkx as nx
 
 
 class Config:
@@ -25,7 +24,7 @@ class Config:
     Configuration parameters for the interbank network
     """
     T: int = 1000  # time (1000)
-    N: int = 50    # number of banks (50)
+    N: int = 50  # number of banks (50)
 
     # not used in this implementation:
     # ȓ: float  = 0.02     # percentage reserves (at the moment, no R is used)
@@ -36,22 +35,22 @@ class Config:
     ω: float = 0.55  # omega
 
     # screening costs
-    Φ: float = 0.025   # phi
+    Φ: float = 0.025  # phi
     Χ: float = 0.015  # ji
 
     # liquidation cost of collateral
     ξ: float = 0.3  # xi
     ρ: float = 0.3  # ro fire sale cost
 
-    β: float = 4    # intensity of breaking the connection
+    β: float = 4  # intensity of breaking the connection
     α: float = 0.1  # below this level of E or D, we will bankrupt the bank
 
     # banks initial parameters
     # L + C + (R) = D + E
-    L_i0: float = 120   # long term assets
-    C_i0: float = 30    # capital
-    D_i0: float = 135   # deposits
-    E_i0: float = 15    # equity
+    L_i0: float = 120  # long term assets
+    C_i0: float = 30  # capital
+    D_i0: float = 135  # deposits
+    E_i0: float = 15  # equity
     r_i0: float = 0.02  # initial rate
 
     def __str__(self):
@@ -73,13 +72,14 @@ class DataColumns(enum.IntEnum):
     BEST_NUM_CLIENTS = 6
     CREDIT_CHANNELS = 7
     RATIONING = 8
-    LEVERAGE = 9    
+    LEVERAGE = 9
+
     def get_name(i):
         for j in DataColumns:
-            if j.value==i:
+            if j.value == i:
                 return j.name.replace("_", " ").lower()
         return None
-    
+
 
 class Statistics:
     bankruptcy = []
@@ -185,7 +185,6 @@ class Statistics:
         filename = sys.argv[0] if self.model.export_datafile is None else self.model.export_datafile
         plt.savefig(Statistics.get_export_path(filename).replace('.txt', f"_{t}.png"))
 
-
     @staticmethod
     def get_export_path(filename):
         if not filename.startswith(Statistics.OUTPUT_DIRECTORY):
@@ -238,8 +237,6 @@ class Statistics:
         plt.xlabel("Time")
         plt.title(title)
         plt.show()
-        
-        
 
     def plot_interest_rate(self):
         title = "Interest"
@@ -253,7 +250,7 @@ class Statistics:
         plt.ylabel("interest")
         plt.xlabel("Time")
         plt.title(title)
-        plt.show() 
+        plt.show()
 
     def save_liquidity(self, export_datafile):
         self.plot_liquidity(no_draw_but_return=True)
@@ -303,13 +300,12 @@ class Statistics:
             yy.append(self.best_lender[i] / self.model.config.N)
             yy2.append(self.best_lender_clients[i] / self.model.config.N)
         plt.clf()
-        plt.plot( xx, yy, 'r-' ,xx, yy2,'b--')
+        plt.plot(xx, yy, 'r-', xx, yy2, 'b--')
         plt.suptitle(title)
         plt.xlabel("Best lender(red)")
         plt.ylabel("Clients best lender(blue)")
         if not no_draw_but_return:
             plt.show()
-
 
 
 class Log:
@@ -456,7 +452,7 @@ class Model:
     export_description = None
 
     policy_actions_translation = [0.0, 0.5, 1.0]
-    
+
     def __init__(self, **configuration):
         self.log = Log(self)
         self.statistics = Statistics(self)
@@ -481,7 +477,7 @@ class Model:
         self.initialize()
 
     def initialize(self, seed=None, dont_seed=False, save_graphs_instants=None,
-                   export_datafile=None, export_description=None ):
+                   export_datafile=None, export_description=None):
         self.statistics.reset()
         if not dont_seed:
             random.seed(seed if seed else self.default_seed)
@@ -563,7 +559,7 @@ class Model:
             self.log.debug("*****", f"ŋ changed to {ŋ}")
             self.policy_changes += 1
         self.ŋ = ŋ
-        
+
     def limit_to_two_policies(self):
         self.policy_actions_translation = [0.0, 1.0]
 
@@ -994,9 +990,8 @@ class Bank:
 
 class Utils:
     """
-    Auxiliary class to encapsulate the
+    Auxiliary class to encapsulate the execution and parametrization
     """
-
 
     @staticmethod
     def __extract_t_values_from_arg__(param):
@@ -1011,29 +1006,35 @@ class Utils:
             return t
 
     @staticmethod
-    def run_interactive(log: str = typer.Option('ERROR', help="Log level messages (ERROR,DEBUG,INFO...)"),
-                        modules: str = typer.Option(None, help=f"Log only this modules (separated by ,)"),
-                        logfile: str = typer.Option(None, help="File to send logs to"),
-                        save: str = typer.Option(None, help=f"Saves the output of this execution"),
-                        graph: str = typer.Option(None, help=f"List of t in which save the network config"),
-                        n: int = typer.Option(Config.N, help=f"Number of banks"),
-                        debug: int = typer.Option(None, help="Stop and enter in debug mode after at this time"),
-                        eta: float = typer.Option(Model.ŋ, help=f"Policy recommendation"),
-                        t: int = typer.Option(Config.T, help=f"Time repetitions")):
+    def run_interactive():
         """
             Run interactively the model
         """
         global model
-        if t != model.config.T:
-            model.config.T = t
-        if n != model.config.N:
-            model.config.N = n
-        if eta != model.ŋ:
-            model.ŋ = eta
-        if debug:
-            model.do_debug(debug)
-        model.log.define_log(log, logfile, modules)
-        Utils.run(save, Utils.__extract_t_values_from_arg__(graph))
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--log", default='ERROR', help="Log level messages (ERROR,DEBUG,INFO...)")
+        parser.add_argument("--modules", default=None, help=f"Log only this modules (separated by ,)")
+        parser.add_argument("--logfile", default=None, help="File to send logs to")
+        parser.add_argument("--save", default=None, help=f"Saves the output of this execution")
+        parser.add_argument("--graph", default=None, help=f"List of t in which save the network config")
+        parser.add_argument("--n", type=int, default=Config.N, help=f"Number of banks")
+        parser.add_argument("--debug", type=int, default=None,
+                            help="Stop and enter in debug mode after at this time")
+        parser.add_argument("--eta", type=float, default=Model.ŋ, help=f"Policy recommendation")
+        parser.add_argument("--t", type=int, default=Config.T, help=f"Time repetitions")
+
+        args = parser.parse_args()
+
+        if args.t != model.config.T:
+            model.config.T = args.t
+        if args.n != model.config.N:
+            model.config.N = args.n
+        if args.eta != model.ŋ:
+            model.ŋ = args.eta
+        if args.debug:
+            model.do_debug(args.debug)
+        model.log.define_log(args.log, args.logfile, args.modules)
+        Utils.run(args.save, Utils.__extract_t_values_from_arg__(args.graph))
 
     @staticmethod
     def run(save=None, save_graph_instants=None):
@@ -1042,21 +1043,21 @@ class Utils:
         model.simulate_full()
         model.finish()
 
-
     @staticmethod
     def is_notebook():
         try:
             __IPYTHON__
-            return get_ipython().__class__.__name__!="SpyderShell"
+            return get_ipython().__class__.__name__ != "SpyderShell"
         except NameError:
             return False
-        
+
     @staticmethod
     def is_spyder():
         try:
-            return get_ipython().__class__.__name__=="SpyderShell"
+            return get_ipython().__class__.__name__ == "SpyderShell"
         except:
             return False
+
 
 # %%
 
@@ -1068,7 +1069,7 @@ if Utils.is_notebook():
 else:
     # if we are running interactively:
     if __name__ == "__main__":
-        typer.run(Utils.run_interactive)
+        Utils.run_interactive()
 
 # in other cases, if you import it, the process will be:
 #   model = Model()
