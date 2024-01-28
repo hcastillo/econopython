@@ -16,9 +16,10 @@ import argparse
 import numpy as np
 import sys
 import matplotlib.pyplot as plt
-# import networkx as nx
+import networkx as nx
 
 
+# noinspection NonAsciiCharacters
 class Config:
     """
     Configuration parameters for the interbank network
@@ -407,6 +408,8 @@ class Log:
             ch.setFormatter(formatter)
             self.logger.addHandler(ch)
 
+
+# noinspection NonAsciiCharacters
 
 class Model:
     """
@@ -830,7 +833,8 @@ class Model:
         self.log.debug("links", f"maxE={maxE:.3f} maxC={maxC:.3f} maxλ={maxλ:.3f} minr={minr:.3f} ŋ={self.ŋ:.3f}")
 
         # (equation 7)
-        loginfo = loginfo1 = ""
+        loginfo = ""
+        loginfo1 = ""
         for bank in self.banks:
             bank.μ = self.ŋ * (bank.C / maxC) + (1 - self.ŋ) * (minr / bank.r)
             loginfo += f"{bank.getId(short=True)}:{bank.μ:.3f},"
@@ -855,6 +859,8 @@ class Model:
 
 
 # %%
+
+# noinspection NonAsciiCharacters
 
 class Bank:
     """
@@ -988,6 +994,7 @@ class Bank:
                     return amountToSell
 
 
+# noinspection NonAsciiCharacters,PyStatementEffect
 class Utils:
     """
     Auxiliary class to encapsulate the execution and parametrization
@@ -1012,17 +1019,24 @@ class Utils:
         """
         global model
         parser = argparse.ArgumentParser()
-        parser.add_argument("--log", default='ERROR', help="Log level messages (ERROR,DEBUG,INFO...)")
-        parser.add_argument("--modules", default=None, help=f"Log only this modules (separated by ,)")
-        parser.add_argument("--logfile", default=None, help="File to send logs to")
-        parser.add_argument("--save", default=None, help=f"Saves the output of this execution")
-        parser.add_argument("--graph", default=None, help=f"List of t in which save the network config")
-        parser.add_argument("--n", type=int, default=Config.N, help=f"Number of banks")
+        parser.add_argument("--log", default='ERROR', 
+                            help="Log level messages (ERROR,DEBUG,INFO...)")
+        parser.add_argument("--modules", default=None, 
+                            help="Log only this modules (separated by ,)")
+        parser.add_argument("--logfile", default=None, 
+                            help="File to send logs to")
+        parser.add_argument("--save", default=None, 
+                            help="Saves the output of this execution")
+        parser.add_argument("--graph", default=None,
+                            help="List of t in which save the network config")
+        parser.add_argument("--n", type=int, default=Config.N, 
+                            help="Number of banks")
         parser.add_argument("--debug", type=int, default=None,
                             help="Stop and enter in debug mode after at this time")
-        parser.add_argument("--eta", type=float, default=Model.ŋ, help=f"Policy recommendation")
-        parser.add_argument("--t", type=int, default=Config.T, help=f"Time repetitions")
-
+        parser.add_argument("--eta", type=float, default=Model.ŋ, 
+                            help="Policy recommendation")
+        parser.add_argument("--t", type=int, default=Config.T,
+                            help="Time repetitions")
         args = parser.parse_args()
 
         if args.t != model.config.T:
