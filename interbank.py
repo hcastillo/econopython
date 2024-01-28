@@ -166,11 +166,10 @@ class Statistics:
             self.save_liquidity(export_datafile)
             self.save_credit_channels(export_datafile)
 
-        if Utils.is_notebook() or Utils.is_spyder():
-            self.plot_bankruptcies()
-            self.plot_liquidity()
-            self.plot_best_lender()
-            self.plot_interest_rate()
+        self.plot_bankruptcies()
+        self.plot_liquidity()
+        self.plot_best_lender()
+        self.plot_interest_rate()
 
     def get_graph(self, t):
         """
